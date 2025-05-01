@@ -124,7 +124,37 @@
             background-color: #ffebee;
             border-radius: 4px;
         }
+        .form-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
         
+        button {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        button[type="submit"][name="submit_search"] {
+            background-color: #3498db;
+            color: white;
+        }
+        
+        button[type="submit"][name="submit_search"]:hover {
+            background-color: #2980b9;
+        }
+        
+        .clear-btn {
+            background-color: #e74c3c;
+            color: white;
+        }
+        
+        .clear-btn:hover {
+            background-color: #c0392b;
+        }        
         @media (max-width: 768px) {
             .container {
                 flex-direction: column;
@@ -163,8 +193,11 @@
             <form method="post">
                 {% csrf_token %}
                 {{ search_form.as_p }}
-                <button type="submit" name="submit_search">Найти</button>
-            </form>
+                <div class="form-buttons">
+                    <button type="submit" name="submit_search">Найти</button>
+                    <button type="submit" name="clear_results" class="clear-btn">Очистить</button>
+                </div>
+            </form>            
             
             {% if page_obj %}
             <div class="results">
@@ -242,5 +275,14 @@
             }
         });
     </script>
+    <!-- Добавляем скрипт для очистки формы -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Очищаем форму при нажатии кнопки "Очистить"
+            document.querySelector('button[name="clear_results"]').addEventListener('click', function() {
+                document.querySelector('form').reset();
+            });
+        });
+    </script>    
 </body>
 </html>

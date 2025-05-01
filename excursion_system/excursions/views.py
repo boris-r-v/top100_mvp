@@ -26,16 +26,21 @@ def home(request):
     
     return render(request, 'home.html', {'form': form, 'message': "Это MVP заявочной системы"})
 
-def excursions_view(request):
+def excursions_view_old(request):
     """
     Основная страница экскурсий:
     - Форма добавления новой экскурсии
     - Форма поиска экскурсий
     - Таблица с результатами
+    - Очистка результатов
     """
     # Проверка аутентификации
     if not request.session.get('authenticated'):
         return redirect('home')
+    
+    # Обработка очистки результатов
+    if request.method == 'POST' and 'clear_results' in request.POST:
+        return redirect('excursions')
     
     # Обработка формы предложения экскурсии
     if request.method == 'POST' and 'submit_proposal' in request.POST:
@@ -80,6 +85,58 @@ def excursions_view(request):
         'search_form': search_form,
         'page_obj': page_obj
     })
+
+def excursions_view(request):
+    if not request.session.get('authenticated'):
+        return redirect('home')
+    
+    # Обработка очистки результатов
+    if request.method == 'POST' and 'clear_results' in request.POST:
+        return render(request, 'excursions.html', {
+            'form': ExcursionForm(),
+            'search_form': SearchForm(),
+            'page_obj': None
+        })
+    
+    # Обработка формы предложения
+    if request.method == 'POST' and 'submit_proposal' in request.POST:
+        form = ExcursionForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Экскурсия успешно предложена!")
+            return redirect('excursions')
+    
+    # Обработка формы поиска
+    search_form = SearchForm(request.POST or None)
+    excursions = None
+    
+    if request.method == 'POST' and 'submit_search' in request.POST and search_form.is_valid():
+        city = search_form.cleaned_data.get('city')
+        search_date = search_form.cleaned_data.get('search_date')
+        
+        excursions = Excursion.objects.all()
+        
+        if city:
+            excursions = excursions.filter(city__icontains=city)
+        
+        if search_date:
+            excursions = excursions.filter(
+                start_date__lte=search_date,
+                end_date__gte=search_date
+            )
+    else:
+        excursions = Excursion.objects.none()  # Пустой queryset по умолчанию
+    
+    paginator = Paginator(excursions, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    return render(request, 'excursions.html', {
+        'form': ExcursionForm(),
+        'search_form': search_form,
+        'page_obj': page_obj
+    })
+
 
 def export_excursions(request):
     """Экспорт экскурсий в Excel"""
