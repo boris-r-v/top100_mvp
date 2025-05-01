@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Экскурсии</title>
+    <style>
+        .container {
+            display: flex;
+            gap: 50px;
+        }
+        .proposal-form, .search-form {
+            width: 300px;
+        }
+        .results {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Экскурсии</h1>
+    
+    <div class="container">
+        <div class="proposal-form">
+            <h2>Предложить экскурсию</h2>
+            <form method="post">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <button type="submit" name="submit_proposal">Предложить</button>
+            </form>
+        </div>
+        
+        <div class="search-form">
+            <h2>Найти экскурсии</h2>
+            <form method="post">
+                {% csrf_token %}
+                {{ search_form.as_p }}
+                <button type="submit" name="submit_search">Найти</button>
+            </form>
+            
+            {% if excursions %}
+            <div class="results">
+                <h3>Найденные экскурсии:</h3>
+                <ul>
+                    {% for excursion in excursions %}
+                    <li>
+                        <strong>Город:</strong> {{ excursion.city }}<br>
+                        <strong>Предприятие:</strong> {{ excursion.company }}<br>
+                        <strong>Контакт:</strong> {{ excursion.full_name }} ({{ excursion.email }})<br>
+                        <strong>Период:</strong> {{ excursion.start_date }} - {{ excursion.end_date }}
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    {% if messages %}
+        {% for message in messages %}
+            <p style="color: green;">{{ message }}</p>
+        {% endfor %}
+    {% endif %}
+</body>
+</html>
