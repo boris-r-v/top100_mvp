@@ -37,12 +37,26 @@ def excursions_view(request):
         elif 'submit_search' in request.POST:
             search_form = SearchForm(request.POST)
             if search_form.is_valid():
+                city = search_form.cleaned_data['city']
                 search_date = search_form.cleaned_data['search_date']
-                excursions = Excursion.objects.filter(
-                    start_date__lte=search_date,
-                    end_date__gte=search_date
-                )
-    
+                
+                # Создаем базовый запрос
+                excursions = Excursion.objects.all()
+                
+                # Фильтруем по городу (если указан)
+                if city:
+                    excursions = excursions.filter(city__icontains=city)
+                
+                # Фильтруем по дате (если указана)
+                if search_date:
+                    excursions = excursions.filter(
+                        start_date__lte=search_date,
+                        end_date__gte=search_date
+                    )
+                
+                # Если не указаны параметры поиска - возвращаем все экскурсии
+                if not city and not search_date:
+                    excursions = Excursion.objects.all()
     return render(request, 'excursions.html', {
         'form': ExcursionForm(),
         'search_form': SearchForm(),

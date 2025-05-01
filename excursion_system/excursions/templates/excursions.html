@@ -30,6 +30,8 @@
         
         <div class="search-form">
             <h2>Найти экскурсии</h2>
+            {{ search_form.city.help_text }}
+            {{ search_form.search_date.help_text }}   
             <form method="post">
                 {% csrf_token %}
                 {{ search_form.as_p }}
@@ -38,34 +40,30 @@
             
             {% if excursions %}
             <div class="results">
-                <h3>Найденные экскурсии:</h3>
+                <h3>Результаты поиска:</h3>
+                {% if not search_form.cleaned_data.city and not search_form.cleaned_data.search_date %}
+                    <p>Показаны все доступные экскурсии</p>
+                {% endif %}
                 <ul>
-<!--                    
                     {% for excursion in excursions %}
                     <li>
                         <strong>Город:</strong> {{ excursion.city }}<br>
                         <strong>Предприятие:</strong> {{ excursion.company }}<br>
-                        <strong>Контакт:</strong> {{ excursion.full_name }} ({{ excursion.email }})<br>
-                        <strong>Период:</strong> {{ excursion.start_date }} - {{ excursion.end_date }}
-                    </li>
-                    {% endfor %}
--->
-                    {% for excursion in excursions %}
-                    <li>
-                        <strong>Город:</strong> {{ excursion.city }}<br>
-                        <strong>Предприятие:</strong> {{ excursion.company }}<br>
-                        <strong>Контакт:</strong> {{ excursion.full_name }}<br>
+                        <strong>Контактное лицо:</strong> {{ excursion.full_name }}<br>
                         <strong>Телефон:</strong> {{ excursion.phone|default:"не указан" }}<br>
                         <strong>Email:</strong> {{ excursion.email }}<br>
-                        <strong>Период:</strong> {{ excursion.start_date }} - {{ excursion.end_date }}
+                        <strong>Период:</strong> {{ excursion.start_date|date:"d.m.Y" }} - {{ excursion.end_date|date:"d.m.Y" }}
                     </li>
-                    {% endfor %}                    
+                    {% empty %}
+                    <li>Экскурсии по указанным критериям не найдены</li>
+                    {% endfor %}
                 </ul>
             </div>
             {% endif %}
-        </div>
+        </div>        
     </div>
-    
+    <button type="button" onclick="document.getElementById('search-form').reset()">Очистить</button>
+ 
     {% if messages %}
         {% for message in messages %}
             <p style="color: green;">{{ message }}</p>

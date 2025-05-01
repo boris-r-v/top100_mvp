@@ -1,5 +1,6 @@
 from django import forms
 from .models import Excursion
+from django.core.validators import MinLengthValidator
 
 class PasswordForm(forms.Form):
     password = forms.CharField(
@@ -18,8 +19,22 @@ class ExcursionForm(forms.ModelForm):
         }
 
 class SearchForm(forms.Form):
+#    city = forms.CharField(
+#        label="Город",
+#        required=False,
+#        widget=forms.TextInput(attrs={'placeholder': 'Введите город'})
+#    )
+    city = forms.CharField(
+        validators=[MinLengthValidator(2)],
+        label="Город",
+        required=False,
+        widget=forms.TextInput(attrs={
+            'placeholder': 'Введите город',
+            'minlength': '2'
+        })
+    )
     search_date = forms.DateField(
         label="Дата экскурсии",
+        required=False,
         widget=forms.DateInput(attrs={'type': 'date'})
-    )    
-    
+    )
