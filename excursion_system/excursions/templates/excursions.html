@@ -40,6 +40,7 @@
             <div class="results">
                 <h3>Найденные экскурсии:</h3>
                 <ul>
+<!--                    
                     {% for excursion in excursions %}
                     <li>
                         <strong>Город:</strong> {{ excursion.city }}<br>
@@ -48,6 +49,17 @@
                         <strong>Период:</strong> {{ excursion.start_date }} - {{ excursion.end_date }}
                     </li>
                     {% endfor %}
+-->
+                    {% for excursion in excursions %}
+                    <li>
+                        <strong>Город:</strong> {{ excursion.city }}<br>
+                        <strong>Предприятие:</strong> {{ excursion.company }}<br>
+                        <strong>Контакт:</strong> {{ excursion.full_name }}<br>
+                        <strong>Телефон:</strong> {{ excursion.phone|default:"не указан" }}<br>
+                        <strong>Email:</strong> {{ excursion.email }}<br>
+                        <strong>Период:</strong> {{ excursion.start_date }} - {{ excursion.end_date }}
+                    </li>
+                    {% endfor %}                    
                 </ul>
             </div>
             {% endif %}

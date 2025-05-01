@@ -10,10 +10,11 @@ class PasswordForm(forms.Form):
 class ExcursionForm(forms.ModelForm):
     class Meta:
         model = Excursion
-        fields = ['city', 'company', 'full_name', 'email', 'start_date', 'end_date']
+        fields = ['city', 'company', 'full_name', 'email', 'phone', 'start_date', 'end_date']
         widgets = {
             'start_date': forms.DateInput(attrs={'type': 'date'}),
             'end_date': forms.DateInput(attrs={'type': 'date'}),
+            'phone': forms.TextInput(attrs={'placeholder': '+7 (XXX) XXX-XX-XX'}),
         }
 
 class SearchForm(forms.Form):
@@ -21,3 +22,4 @@ class SearchForm(forms.Form):
         label="Дата экскурсии",
         widget=forms.DateInput(attrs={'type': 'date'})
     )    
+    
