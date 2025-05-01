@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Система экскурсий</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -75,7 +76,7 @@
             flex: 1;
             display: flex;
             flex-direction: column;
-            min-height: 0; /* Необходимо для правильного растягивания в Firefox */
+            min-height: 0;
         }
         
         .table-scroll {
@@ -83,7 +84,112 @@
             flex: 1;
         }
         
-        /* ... (остальные стили остаются без изменений) ... */
+        .pagination-controls {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 20px 0;
+            align-items: center;
+        }
+        
+        .pagination-btn {
+            padding: 8px 12px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            min-width: 80px;
+            text-align: center;
+        }
+        
+        .pagination-btn:hover {
+            background-color: #2980b9;
+        }
+        
+        .pagination-btn:disabled {
+            background-color: #95a5a6;
+            cursor: not-allowed;
+        }
+        
+        .page-info {
+            padding: 8px 15px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            border: 1px solid #dee2e6;
+            font-weight: bold;
+        }
+        
+        .export-container {
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .export-btn {
+            padding: 10px 20px;
+            background-color: #27ae60;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        
+        .export-btn:hover {
+            background-color: #219653;
+        }
+        
+        .no-results {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+        
+        .form-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        button {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        button[type="submit"][name="submit_search"] {
+            background-color: #3498db;
+            color: white;
+        }
+        
+        button[type="submit"][name="submit_search"]:hover {
+            background-color: #2980b9;
+        }
+        
+        .clear-btn {
+            background-color: #e74c3c;
+            color: white;
+        }
+        
+        .clear-btn:hover {
+            background-color: #c0392b;
+        }
+        
+        @media (max-width: 768px) {
+            .main-container {
+                flex-direction: column;
+            }
+            
+            .form-section {
+                width: auto;
+            }
+            
+            .pagination-controls {
+                flex-wrap: wrap;
+            }
+        }
     </style>
 </head>
 <body>
@@ -123,77 +229,110 @@
                 <h3>Результаты поиска</h3>
                 
                 {% if page_obj %}
-                <div class="pagination">
-                    <span class="step-links">
+                {% if page_obj.paginator.count == 0 %}
+                    <div class="no-results">
+                        <p>Экскурсии по указанным критериям не найдены</p>
+                    </div>
+                {% else %}
+                    <div class="export-container">
+                        <form method="GET" action="{% url 'export_excursions' %}" style="display: inline;">
+                            <input type="hidden" name="city" value="{{ search_form.city.value|default:'' }}">
+                            <input type="hidden" name="search_date" value="{{ search_form.search_date.value|default:'' }}">
+                            <button type="submit" class="export-btn">
+                                <i class="fas fa-file-excel"></i> Экспорт в Excel
+                            </button>
+                        </form>
+                    </div>                 
+                    <div class="pagination-controls">
+                        <form method="GET" style="display: inline;">
+                            <input type="hidden" name="city" value="{{ search_form.city.value|default:'' }}">
+                            <input type="hidden" name="search_date" value="{{ search_form.search_date.value|default:'' }}">
+                            <button type="submit" name="page" value="1" class="pagination-btn" {% if page_obj.number == 1 %}disabled{% endif %}>
+                                &laquo; Первая
+                            </button>
+                        </form>
                         {% if page_obj.has_previous %}
-                            <a href="?{{ search_params }}&page=1">&laquo; первая</a>
-                            <a href="?{{ search_params }}&page={{ page_obj.previous_page_number }}">предыдущая</a>
+                        <form method="GET" style="display: inline;">
+                            <input type="hidden" name="city" value="{{ search_form.city.value|default:'' }}">
+                            <input type="hidden" name="search_date" value="{{ search_form.search_date.value|default:'' }}">
+                            <button type="submit" name="page" value="{{ page_obj.previous_page_number }}" class="pagination-btn" {% if not page_obj.has_previous %}disabled{% endif %}>
+                                Назад
+                            </button>
+                        </form>
                         {% endif %}
-                
-                        <span class="current">
+                        <span class="page-info">
                             Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}
                         </span>
-                
                         {% if page_obj.has_next %}
-                            <a href="?{{ search_params }}&page={{ page_obj.next_page_number }}">следующая</a>
-                            <a href="?{{ search_params }}&page={{ page_obj.paginator.num_pages }}">последняя &raquo;</a>
+                        <form method="GET" style="display: inline;">
+                            <input type="hidden" name="city" value="{{ search_form.city.value|default:'' }}">
+                            <input type="hidden" name="search_date" value="{{ search_form.search_date.value|default:'' }}">
+                            <button type="submit" name="page" value="{{ page_obj.next_page_number }}" class="pagination-btn" {% if not page_obj.has_next %}disabled{% endif %}>
+                                Вперед
+                            </button>
+                        </form>
                         {% endif %}
-                    </span>
-                </div>
-                
-                <!-- Также обновите ссылку экспорта: -->
-                <a href="{% url 'export_excursions' %}?{{ search_params }}" class="export-btn">Экспорт в Excel</a>                
-                <div class="table-wrapper">
-                    <div class="table-scroll">
-                        <table class="excursion-table">
-                            <thead>
-                                <tr>
-                                    <th>Город</th>
-                                    <th>Предприятие</th>
-                                    <th>Контактное лицо</th>
-                                    <th>Телефон</th>
-                                    <th>Email</th>
-                                    <th>Период</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for excursion in page_obj %}
-                                <tr>
-                                    <td>{{ excursion.city }}</td>
-                                    <td>{{ excursion.company }}</td>
-                                    <td>{{ excursion.full_name }}</td>
-                                    <td>{{ excursion.phone|default:"-" }}</td>
-                                    <td>{{ excursion.email }}</td>
-                                    <td>{{ excursion.start_date|date:"d.m.Y" }} - {{ excursion.end_date|date:"d.m.Y" }}</td>
-                                </tr>
-                                {% empty %}
-                                <tr>
-                                    <td colspan="6" class="no-results">Нет данных для отображения</td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
+                        <form method="GET" style="display: inline;">
+                            <input type="hidden" name="city" value="{{ search_form.city.value|default:'' }}">
+                            <input type="hidden" name="search_date" value="{{ search_form.search_date.value|default:'' }}">
+                            <button type="submit" name="page" value="{{ page_obj.paginator.num_pages }}" class="pagination-btn" {% if page_obj.number == page_obj.paginator.num_pages %}disabled{% endif %}>
+                                Последняя &raquo;
+                            </button>
+                        </form>
                     </div>
-                </div>
-                
-                
+                    <div class="table-wrapper">
+                        <div class="table-scroll">
+                            <table class="excursion-table">
+                                <thead>
+                                    <tr>
+                                        <th>Город</th>
+                                        <th>Предприятие</th>
+                                        <th>Контактное лицо</th>
+                                        <th>Телефон</th>
+                                        <th>Email</th>
+                                        <th>Период</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for excursion in page_obj %}
+                                    <tr>
+                                        <td>{{ excursion.city }}</td>
+                                        <td>{{ excursion.company }}</td>
+                                        <td>{{ excursion.full_name }}</td>
+                                        <td>{{ excursion.phone|default:"-" }}</td>
+                                        <td>{{ excursion.email }}</td>
+                                        <td>{{ excursion.start_date|date:"d.m.Y" }} - {{ excursion.end_date|date:"d.m.Y" }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 {% endif %}
-            </div>
+            {% endif %}
         </div>
     </div>
+</div>
 
-    <!-- Подключение скриптов -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
-    <script>
-        $(document).ready(function(){
-            $('input[name="phone"]').mask('+7 (000) 000-00-00');
-            
-            // Очищаем форму при нажатии кнопки "Очистить"
-            $('button[name="clear_results"]').click(function() {
-                $('form').trigger('reset');
-            });
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
+<script>
+    $(document).ready(function(){
+        // Маска для телефона
+        $('input[name="phone"]').mask('+7 (000) 000-00-00');
+        
+        // Очистка формы при нажатии "Очистить"
+        $('button[name="clear_results"]').click(function() {
+            $('form').trigger('reset');
         });
-    </script>
+        
+        // Сохранение параметров поиска в URL
+        $('form[name="search"]').submit(function(e) {
+            const formData = new FormData(this);
+            const params = new URLSearchParams(formData).toString();
+            window.history.replaceState(null, null, `?${params}`);
+        });
+    });
+</script>
 </body>
 </html>
