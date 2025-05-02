@@ -7,16 +7,19 @@ from django.http import HttpResponse
 import openpyxl
 from openpyxl.styles import Font
 from datetime import datetime
+import hashlib
 
 # Секретный пароль для доступа (в реальном проекте используйте Django auth)
-SECRET_PASSWORD = "admin123"
+#SECRET_PASSWORD = "top100"
+PWDHASH='3422eb9e9f9e19587b5a1ef618b4da75d953e5b21d922b0a1f55f44902da8421'
 
 def home(request):
     """Главная страница с вводом пароля"""
     if request.method == 'POST':
         form = PasswordForm(request.POST)
         if form.is_valid():
-            if form.cleaned_data['password'] == SECRET_PASSWORD:
+            pwd: str = form.cleaned_data['password']
+            if  hashlib.sha256( pwd.encode()).hexdigest() == PWDHASH:
                 request.session['authenticated'] = True
                 return redirect('excursions')
             else:
