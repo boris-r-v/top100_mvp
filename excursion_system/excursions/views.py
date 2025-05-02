@@ -66,7 +66,7 @@ def excursions_view(request):
                     end_date__gte=search_date
                 )
 
-    paginator = Paginator(excursions, 2)
+    paginator = Paginator(excursions, 10)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
